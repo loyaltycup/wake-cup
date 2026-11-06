@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wake Cup Loyalty</title>
+    <!-- PWA Manifest -->
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Wake%20Cup%20Loyalty%22%2C%22short_name%22%3A%22WakeCup%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fimages.box.gr%2Fresized%2Fshops%2Flogo%2F%403x1706090904_308762%403x.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+    
+    <!-- QR Code & Scanner Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+    <!-- OneSignal SDK για Push Notifications με κλειστή εφαρμογή -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "cd768e13-7b45-491c-aa52-53405ec8dd66",
+          safari_web_id: "web.onesignal.auto.xxxxxx",
+          notifyButton: { enable: true },
+        });
+      });
+    </script>
+
+    <style>
+        :root {
+            --bg: #080808;
+            --card-bg: #141414;
+            --text: #ffffff;
+            --text-muted: #888888;
+            --accent: #ffffff;
+            --border: #222222;
+            --gold: #d4af37;
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
+        }
+
+        [data-theme="light"] {
+            --bg: #f2f2f5;
+            --card-bg: #ffffff;
+            --text: #111111;
+            --text-muted: #666666;
+            --accent: #000000;
+            --border: #e2e2e8;
+            --gold: #b8860b;
+            --shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        iframe#netlify-badge, a[href*="netlify.com/pp"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            min-height: 100vh;
+            padding: 24px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-container {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #000000;
+            border: 1.5px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .logo-text h1 {
+            margin: 0;
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text p {
+            margin: 2px 0 0 0;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: var(--border);
+            color: var(--text);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.9);
+        }
+
+        #broadcast-banner {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            padding: 14px 16px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .rewards-info {
+            font-size: 13px;
+            background: var(--bg);
+            padding: 16px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            line-height: 1.6;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            box-sizing: border-box;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            transition: border-color 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--text);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .stamp-slot {
+            aspect-ratio: 1;
+            border: 2px dashed var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: var(--bg);
+            font-weight: 800;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .stamp-slot.filled {
+            background: var(--text);
+            color: var(--bg);
+            border-style: solid;
+            border-color: var(--text);
+            transform: scale(1.05);
+            box-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
+            animation: popIn 0.3s ease;
+        }
+
+        .stamp-slot.reward-6 { border-color: var(--gold); }
+        .stamp-slot.reward-10 { border-color: #ff4500; }
+
+        .status-box {
+            text-align: center;
+            margin: 15px 0;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        button {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 15px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: 800;
+            transition: opacity 0.2s, transform 0.1s;
+            letter-spacing: 0.3px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .secondary-btn {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .secondary-btn:hover {
+            background: var(--border);
+        }
+
+        .pwa-install-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            border: 1px dashed var(--text);
+            font-size: 13px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .redeem-panel {
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid var(--gold);
+            padding: 16px;
+            border-radius: 16px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .admin-panel {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .stats-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-card h5 {
+            margin: 0;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .stat-card p {
+            margin: 6px 0 0 0;
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text);
+        }
+
+        .hidden { display: none !important; }
+
+        #qrcode-container {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 18px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        #reader {
+            width: 100% !important;
+            min-height: 320px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .tabs button {
+            margin-top: 0;
+            background: var(--border);
+            color: var(--text);
+            font-size: 11px;
+            padding: 8px 4px;
+            flex: 1;
+        }
+
+        .tabs button.active {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        hr {
+            margin: 24px 0;
+            border: 0;
+            border-top: 1px solid var(--border);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 15px 0 5px 0;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <div class="container">
+        <div>
+            <header>
+                <div class="logo-area">
+                    <div class="logo-container">
+                        <img src="https://images.box.gr/resized/shops/logo/@3x1706090904_308762@3x.png" alt="Wake Cup Logo">
+                    </div>
+                    <div class="logo-text">
+                        <h1>WAKE CUP</h1>
+                        <p>Easy way to start your day</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+                </div>
+            </header>
+
+            <button class="pwa-install-btn" onclick="installPWA()">📱 Προσθήκη στην Αρχική Οθόνη (App)</button>
+
+            <div id="broadcast-banner">📢 <span id="broadcast-text"></span></div>
+
+            <!-- Customer View -->
+            <div id="customer-view">
+                <div class="rewards-info">
+                    🎁 <b>Προνόμια Κάρτας:</b><br>
+                    • <b>6 Σφραγίδες:</b> Δωρεάν Καφές ☕<br>
+                    • <b>10 Σφραγίδες:</b> Καφές + Bakery Treat 🥐
+                </div>
+
+                <div class="input-group">
+                    <label>Αριθμός Τηλεφώνου (ID):</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="user-phone-input" placeholder="6912345678">
+                        <button onclick="loadCustomerCard()" style="margin-top: 0; width: 120px; font-size: 14px;">Είσοδος</button>
+                    </div>
+                </div>
+
+                <div class="card-grid" id="stamps-container"></div>
+                
+                <div class="status-box">
+                    <p id="status-msg">Σφραγίδες: <span id="stamp-count" style="font-size: 20px;">0</span> / 10</p>
+                </div>
+
+                <div id="redeem-section" class="redeem-panel hidden">
+                    <h4 style="margin: 0 0 10px 0; color: var(--gold);">🎉 Διαθέσιμα Δώρα!</h4>
+                    <div id="redeem-buttons" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">QR Code Ταμείου</p>
+                    <div id="qrcode-container"></div>
+                </div>
+
+                <hr>
+                <button class="secondary-btn" onclick="toggleAdmin()">🔑 Είσοδος Ταμείου</button>
+            </div>
+
+            <!-- Admin / Cashier View -->
+            <div id="admin-view" class="admin-panel hidden">
+                <h3 style="margin-top:0;">Πάνελ Ταμείου</h3>
+                <div id="pin-section">
+                    <p style="font-size: 14px; color: var(--text-muted);">Εισάγετε PIN πρόσβασης:</p>
+                    <input type="password" id="admin-pin" placeholder="••••" style="text-align: center; letter-spacing: 4px; font-size: 18px;">
+                    <button onclick="verifyPin()">Επιβεβαίωση PIN</button>
+                </div>
+
+                <div id="cashier-actions" class="hidden" style="margin-top: 15px;">
+                    <div class="tabs">
+                        <button id="tab-stamp-btn" class="active" onclick="switchTab('stamp')">Σφραγίδες</button>
+                        <button id="tab-broadcast-btn" onclick="switchTab('broadcast')">Ανακοίνωση</button>
+                        <button id="tab-stats-btn" onclick="switchTab('stats')">📊 Στατιστικά</button>
+                    </div>
+
+                    <div id="subtab-stamp">
+                        <div class="input-group">
+                            <label>Τηλέφωνο Πελάτη:</label>
+                            <input type="text" id="target-phone" placeholder="6912345678">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Πλήθος Σφραγίδων:</label>
+                            <select id="stamp-amount">
+                                <option value="1">1 Σφραγίδα</option>
+                                <option value="2">2 Σφραγίδες</option>
+                                <option value="3">3 Σφραγίδες</option>
+                                <option value="4">4 Σφραγίδες</option>
+                                <option value="5">5 Σφραγίδες</option>
+                                <option value="6">6 Σφραγίδες</option>
+                                <option value="7">7 Σφραγίδες</option>
+                                <option value="8">8 Σφραγίδες</option>
+                                <option value="9">9 Σφραγίδες</option>
+                                <option value="10">10 Σφραγίδες</option>
+                            </select>
+                        </div>
+
+                        <button onclick="addStampsToCustomer()">➕ Προσθήκη Σφραγίδων</button>
+                        
+                        <div style="margin: 20px 0; text-align: center; font-size: 12px; color: var(--text-muted);">— Η ΣΑΡΩΣΗ QR —</div>
+                        
+                        <button onclick="startScanner()" style="background: #2e7d32; color: #fff;">📷 Άνοιγμα Κάμερας (Μεγάλη Προβολή)</button>
+                        <div id="reader" style="margin-top: 15px;"></div>
+                    </div>
+
+                    <div id="subtab-broadcast" class="hidden">
+                        <div class="input-group">
+                            <label>Κείμενο Ανακοίνωσης:</label>
+                            <input type="text" id="broadcast-input" placeholder="π.χ. 20% έκπτωση στα πιροσκί!">
+                        </div>
+                        <button onclick="sendBroadcast()" style="background: var(--text); color: var(--bg);">📢 Αποστολή Ανακοίνωσης</button>
+                        <button onclick="clearBroadcast()" class="secondary-btn" style="margin-top: 10px; border-color: #ff4500; color: #ff4500;">🗑️ Διαγραφή Ανακοίνωσης</button>
+                    </div>
+
+                    <div id="subtab-stats" class="hidden">
+                        <!-- ΣΗΜΕΡΙΝΑ -->
+                        <div class="stats-box">
+                            <h4 style="margin: 0; font-size: 13px; text-transform: uppercase;">☀️ Ημέρας</h4>
+                            <div class="stats-grid">
+                                <div class="stat-card"><h5>Σφραγιδες</h5><p id="stat-day-stamps">0</p></div>
+                                <div class="stat-card"><h5>Εξαργυρ.</h5><p id="stat-day-redeems">0</p></div>
+                            </div>
+                            <button onclick="resetStatsField('dayStamps', 'dayRedeems', 'ημέρας')" class="secondary-btn" style="margin-top: 8px; font-size: 11px; padding: 8px; border-color: #ff4500; color: #ff4500;">🗑️ Μηδενισμός Ημέρας</button>
+                        </div>
+
+                        <!-- ΕΒΔΟΜΑΔΙΑΙΑ -->
+                        <div class="stats-box">
+                            <h4 style="margin: 0; font-size: 13px; text-transform: uppercase;">📅 Εβδομάδας</h4>
+                            <div class="stats-grid">
+                                <div class="stat-card"><h5>Σφραγιδες</h5><p id="stat-week-stamps">0</p></div>
+                                <div class="stat-card"><h5>Εξαργυρ.</h5><p id="stat-week-redeems">0</p></div>
+                            </div>
+                            <button onclick="resetStatsField('weekStamps', 'weekRedeems', 'εβδομάδας')" class="secondary-btn" style="margin-top: 8px; font-size: 11px; padding: 8px; border-color: #ff4500; color: #ff4500;">🗑️ Μηδενισμός Εβδομάδας</button>
+                        </div>
+
+                        <!-- ΜΗΝΙΑΙΑ -->
+                        <div class="stats-box">
+                            <h4 style="margin: 0; font-size: 13px; text-transform: uppercase;">🗓️ Μήνα</h4>
+                            <div class="stats-grid">
+                                <div class="stat-card"><h5>Σφραγιδες</h5><p id="stat-month-stamps">0</p></div>
+                                <div class="stat-card"><h5>Εξαργυρ.</h5><p id="stat-month-redeems">0</p></div>
+                            </div>
+                            <button onclick="resetStatsField('monthStamps', 'monthRedeems', 'μήνα')" class="secondary-btn" style="margin-top: 8px; font-size: 11px; padding: 8px; border-color: #ff4500; color: #ff4500;">🗑️ Μηδενισμός Μήνα</button>
+                        </div>
+                    </div>
+
+                    <button class="secondary-btn" onclick="toggleAdmin()" style="margin-top: 20px;">Έξοδος Ταμείου</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Wake Cup &copy; 2026 &bull; Powered by <b>loyalcup</b>
+        </footer>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCl5U9xjufAIXp2_Kb-zGPpO8lNdONfALM",
+            authDomain: "wake-cup-18303.firebaseapp.com",
+            projectId: "wake-cup-18303",
+            storageBucket: "wake-cup-18303.firebasestorage.app",
+            messagingSenderId: "618296104693",
+            appId: "1:618296104693:web:ba124403fe65d87f8ad7bc",
+            measurementId: "G-FYZL690T2B"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let html5QrCode = null;
+        let unsubscribeCustomer = null;
+        let currentCustomerPhone = "";
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        window.installPWA = async function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            } else {
+                alert('📱 Πώς να το βάλετε στην αρχική οθόνη:\n\n• Σε iPhone (Safari): Πατήστε το κουμπί "Κοινή χρήση" (Share) και μετά "Προσθήκη στην οθόνη αφετηρίας".\n• Σε Android (Chrome): Πατήστε τις 3 τελείες επάνω δεξιά και επιλέξτε "Εγκατάσταση εφαρμογής" ή "Προσθήκη στην αρχική οθόνη".');
+            }
+        };
+
+        window.toggleTheme = function() {
+            const body = document.body;
+            const btn = document.getElementById('theme-btn');
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                btn.innerText = '🌙';
+                localStorage.setItem('wake_cup_theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                btn.innerText = '☀️';
+                localStorage.setItem('wake_cup_theme', 'dark');
+            }
+        };
+
+        const savedTheme = localStorage.getItem('wake_cup_theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+        document.getElementById('theme-btn').innerText = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        window.renderStamps = function(count) {
+            const container = document.getElementById('stamps-container');
+            container.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const slot = document.createElement('div');
+                let extraClass = '';
+                if (i === 6) extraClass = ' reward-6';
+                if (i === 10) extraClass = ' reward-10';
+                
+                slot.className = `stamp-slot ${i <= count ? 'filled' : ''}${extraClass}`;
+                slot.innerHTML = i <= count ? '☕' : i;
+                container.appendChild(slot);
+            }
+            document.getElementById('stamp-count').innerText = count;
+
+            const redeemSection = document.getElementById('redeem-section');
+            const redeemButtons = document.getElementById('redeem-buttons');
+            redeemButtons.innerHTML = '';
+
+            if (count >= 6) {
+                redeemSection.classList.remove('hidden');
+
+                if (count >= 6 && count < 10) {
+                    const btn6 = document.createElement('button');
+                    btn6.innerText = '🎁 Εξαργύρωση: Δωρεάν Καφές (-6 σφραγίδες)';
+                    btn6.style.background = 'var(--gold)';
+                    btn6.style.color = '#000';
+                    btn6.onclick = () => redeemReward(6);
+                    redeemButtons.appendChild(btn6);
+                } else if (count >= 10) {
+                    const btn6 = document.createElement('button');
+                    btn6.innerText = '☕ Εξαργύρωση: Δωρεάν Καφές (-6 σφραγίδες)';
+                    btn6.className = 'secondary-btn';
+                    btn6.onclick = () => redeemReward(6);
+
+                    const btn10 = document.createElement('button');
+                    btn10.innerText = '🥐 Εξαργύρωση: Καφές + Treat (-10 σφραγίδες)';
+                    btn10.style.background = 'var(--gold)';
+                    btn10.style.color = '#000';
+                    btn10.onclick = () => redeemReward(10);
+
+                    redeemButtons.appendChild(btn6);
+                    redeemButtons.appendChild(btn10);
+                }
+            } else {
+                redeemSection.classList.add('hidden');
+            }
+        }
+
+        window.updateStats = async function(stampsAdded, redeemsAdded) {
+            const statsRef = doc(db, "settings", "stats");
+            const snap = await getDoc(statsRef);
+            let data = snap.exists() ? snap.data() : { 
+                dayStamps: 0, dayRedeems: 0, 
+                weekStamps: 0, weekRedeems: 0, 
+                monthStamps: 0, monthRedeems: 0 
+            };
+            
+            data.dayStamps = (data.dayStamps || 0) + stampsAdded;
+            data.dayRedeems = (data.dayRedeems || 0) + redeemsAdded;
+            data.weekStamps = (data.weekStamps || 0) + stampsAdded;
+            data.weekRedeems = (data.weekRedeems || 0) + redeemsAdded;
+            data.monthStamps = (data.monthStamps || 0) + stampsAdded;
+            data.monthRedeems = (data.monthRedeems || 0) + redeemsAdded;
+
+            await setDoc(statsRef, data, { merge: true });
+        };
+
+        window.redeemReward = async function(cost) {
+            if (!currentCustomerPhone) return;
+            if (confirm(`Είστε σίγουροι ότι θέλετε να εξαργυρώσετε ${cost} σφραγίδες;`)) {
+                const docRef = doc(db, "customers", currentCustomerPhone);
+                const docSnap = await getDoc(docRef);
+                let current = docSnap.exists() ? (docSnap.data().stamps || 0) : 0;
+                
+                if (current >= cost) {
+                    current -= cost;
+                    await setDoc(docRef, { stamps: current }, { merge: true });
+                    await window.updateStats(0, 1);
+                    alert('Η εξαργύρωση ολοκληρώθηκε επιτυχώς! Απολαύστε το δώρο σας!');
+                }
+            }
+        }
+
+        window.generateQR = function(phone) {
+            const qrContainer = document.getElementById('qrcode-container');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: phone,
+                width: 140,
+                height: 140
+            });
+        }
+
+        window.loadCustomerCard = function() {
+            const phone = document.getElementById('user-phone-input').value.trim();
+            if (!phone) { alert('Παρακαλώ εισάγετε το τηλέφωνό σας.'); return; }
+            
+            currentCustomerPhone = phone;
+            localStorage.setItem('wake_cup_phone', phone);
+            generateQR(phone);
+
+            if (unsubscribeCustomer) { unsubscribeCustomer(); }
+
+            const docRef = doc(db, "customers", phone);
+            unsubscribeCustomer = onSnapshot(docRef, (docSnap) => {
+                let stamps = 0;
+                if (docSnap.exists()) {
+                    stamps = docSnap.data().stamps || 0;
+                }
+                renderStamps(stamps);
+            });
+        }
+
+        onSnapshot(doc(db, "settings", "broadcast"), (docSnap) => {
+            if (docSnap.exists() && docSnap.data().message) {
+                const msg = docSnap.data().message;
+                document.getElementById('broadcast-text').innerText = msg;
+                document.getElementById('broadcast-banner').style.display = 'block';
+            } else {
+                document.getElementById('broadcast-banner').style.display = 'none';
+            }
+        });
+
+        onSnapshot(doc(db, "settings", "stats"), (docSnap) => {
+            if (docSnap.exists()) {
+                const d = docSnap.data();
+                document.getElementById('stat-day-stamps').innerText = d.dayStamps || 0;
+                document.getElementById('stat-day-redeems').innerText = d.dayRedeems || 0;
+                document.getElementById('stat-week-stamps').innerText = d.weekStamps || 0;
+                document.getElementById('stat-week-redeems').innerText = d.weekRedeems || 0;
+                document.getElementById('stat-month-stamps').innerText = d.monthStamps || 0;
+                document.getElementById('stat-month-redeems').innerText = d.monthRedeems || 0;
+            } else {
+                document.getElementById('stat-day-stamps').innerText = 0;
+                document.getElementById('stat-day-redeems').innerText = 0;
+                document.getElementById('stat-week-stamps').innerText = 0;
+                document.getElementById('stat-week-redeems').innerText = 0;
+                document.getElementById('stat-month-stamps').innerText = 0;
+                document.getElementById('stat-month-redeems').innerText = 0;
+            }
+        });
+
+        window.toggleAdmin = function() {
+            document.getElementById('admin-view').classList.toggle('hidden');
+            document.getElementById('admin-pin').value = '';
+            document.getElementById('cashier-actions').classList.add('hidden');
+            document.getElementById('pin-section').classList.remove('hidden');
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop();
+            }
+        };
+
+        window.verifyPin = function() {
+            const pin = document.getElementById('admin-pin').value;
+            if (pin === '2255') {
+                document.getElementById('pin-section').classList.add('hidden');
+                document.getElementById('cashier-actions').classList.remove('hidden');
+            } else {
+                alert('Λάθος PIN!');
+            }
+        };
+
+        window.switchTab = function(tab) {
+            document.getElementById('subtab-stamp').classList.add('hidden');
+            document.getElementById('subtab-broadcast').classList.add('hidden');
+            document.getElementById('subtab-stats').classList.add('hidden');
+            document.getElementById('tab-stamp-btn').classList.remove('active');
+            document.getElementById('tab-broadcast-btn').classList.remove('active');
+            document.getElementById('tab-stats-btn').classList.remove('active');
+
+            if (tab === 'stamp') {
+                document.getElementById('subtab-stamp').classList.remove('hidden');
+                document.getElementById('tab-stamp-btn').classList.add('active');
+            } else if (tab === 'broadcast') {
+                document.getElementById('subtab-broadcast').classList.remove('hidden');
+                document.getElementById('tab-broadcast-btn').classList.add('active');
+                if (html5QrCode && html5QrCode.isScanning) { html5QrCode.stop(); }
+            } else if (tab === 'stats') {
+                document.getElementById('subtab-stats').classList.remove('hidden');
+                document.getElementById('tab-stats-btn').classList.add('active');
+                if (html5QrCode && html5QrCode.isScanning) { html5QrCode.stop(); }
+            }
+        };
+
+        window.processStampAddition = async function(phone, countToAdd) {
+            const docRef = doc(db, "customers", phone);
+            const docSnap = await getDoc(docRef);
+            let currentStamps = docSnap.exists() ? (docSnap.data().stamps || 0) : 0;
+            
+            if (currentStamps >= 10) {
+                alert(`⚠️ Ο πελάτης ${phone} έχει συμπληρώσει ήδη 10/10 σφραγίδες!\nΠρέπει πρώτα να εξαργυρώσει το δώρο του για να μπορέσει να μαζέψει νέες.`);
+                return;
+            }
+
+            if (currentStamps + countToAdd > 10) {
+                alert(`⚠️ Ο πελάτης έχει ήδη ${currentStamps}/10 σφραγίδες. Δεν μπορείτε να προσθέσετε τόσες πολλές ταυτόχρονα, καθώς θα ξεπεράσει το όριο των 10!`);
+                return;
+            }
+            
+            currentStamps += countToAdd;
+            await setDoc(docRef, { stamps: currentStamps }, { merge: true });
+            await window.updateStats(countToAdd, 0);
+            alert(`Επιτυχία! Προστέθηκαν ${countToAdd} σφραγίδες στον πελάτη ${phone}. Νέο σύνολο: ${currentStamps}/10`);
+        };
+
+        window.addStampsToCustomer = async function() {
+            const phone = document.getElementById('target-phone').value.trim();
+            const amount = parseInt(document.getElementById('stamp-amount').value);
+            if (!phone) { alert('Βάλτε τηλέφωνο πελάτη!'); return; }
+            await window.processStampAddition(phone, amount);
+            document.getElementById('target-phone').value = '';
+        };
+
+        window.startScanner = function() {
+            const amount = parseInt(document.getElementById('stamp-amount').value);
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("reader");
+            }
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 15, qrbox: { width: 280, height: 280 } },
+                async (decodedText) => {
+                    await html5QrCode.stop();
+                    alert(`Επιτυχής Σάρωση! Τηλέφωνο: ${decodedText}`);
+                    await window.processStampAddition(decodedText, amount);
+                },
+                (errorMessage) => {}
+            ).catch(err => {
+                alert('Αδυναμία εκκίνησης κάμερας. Βεβαιωθείτε ότι επιτρέψατε την πρόσβαση.');
+            });
+        };
+
+        window.sendBroadcast = async function() {
+            const msg = document.getElementById('broadcast-input').value.trim();
+            if (!msg) { alert('Γράψτε κάποιο μήνυμα προσφοράς.'); return; }
+            await setDoc(doc(db, "settings", "broadcast"), { message: msg });
+            alert('Η ανακοίνωση εστάλη επιτυχώς!');
+            document.getElementById('broadcast-input').value = '';
+        };
+
+        window.clearBroadcast = async function() {
+            await setDoc(doc(db, "settings", "broadcast"), { message: "" });
+            alert('Η ανακοίνωση διαγράφηκε επιτυχώς!');
+        };
+
+        window.resetStatsField = async function(stampsKey, redeemsKey, labelName) {
+            if (confirm(`Είστε σίγουροι ότι θέλετε να μηδενίσετε τα στατιστικά ${labelName};`)) {
+                let updates = {};
+                updates[stampsKey] = 0;
+                updates[redeemsKey] = 0;
+                await setDoc(doc(db, "settings", "stats"), updates, { merge: true });
+                alert(`Τα στατιστικά ${labelName} μηδενίστηκαν!`);
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderStamps(0);
+            const savedPhone = localStorage.getItem('wake_cup_phone');
+            if (savedPhone) {
+                document.getElementById('user-phone-input').value = savedPhone;
+                loadCustomerCard();
+            }
+        });
+    </script>
+</body>
+</html>
