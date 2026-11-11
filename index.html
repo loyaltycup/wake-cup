@@ -11,19 +11,34 @@
     <!-- QR Code & Scanner Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<!-- Firebase Web Push Notifications -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCl5U9xjufAIXp2_Kb-zGPpO8lNdONfALM",
+    authDomain: "wake-cup-18303.firebaseapp.com",
+    projectId: "wake-cup-18303",
+    storageBucket: "wake-cup-18303.appspot.com",
+    messagingSenderId: "618296104693",
+    appId: "1:618296104693:web:ba124403fe65d87f8ad7bc"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
 
-    <!-- OneSignal SDK για Push Notifications με κλειστή εφαρμογή -->
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "cd768e13-7b45-491c-aa52-53405ec8dd66",
-          safari_web_id: "web.onesignal.auto.xxxxxx",
-          notifyButton: { enable: true },
-        });
-      });
-    </script>
+  // Αίτηση άδειας για ειδοποιήσεις
+  messaging.requestPermission()
+    .then(() => {
+      return messaging.getToken({ vapidKey: 'BB8B9WRkzbK8Fm8Nuu-7vGSBcyMWye53pA9wZ4pHUcyRV8tTDIOwgO-Nwi83E3fRCDqZ8C6bgOKeRPsjTBQaPfI' });
+    })
+    .then((token) => {
+      console.log('FCM Token:', token);
+    })
+    .catch((err) => {
+      console.log('Δεν δόθηκε άδεια ειδοποιήσεων:', err);
+    });
+</script>
+    
 
     <style>
         :root {
